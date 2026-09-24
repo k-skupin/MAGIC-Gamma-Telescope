@@ -8,3 +8,15 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Ordner mit alternativen Ideen
+/alternative Ideen/
+
+# private Notizen zum Projekt in Word
+*.docx
+*.coc
+~$*.doc
+~$*.docx
+
+# txt-Dateien
+*.txt
