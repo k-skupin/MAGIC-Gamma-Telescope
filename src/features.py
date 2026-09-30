@@ -1,13 +1,14 @@
-import pandas as pd
 import numpy as np
 
 def engineer_features(df):
     """
     Input: DataFrame
+    
     Output: Dataframe
     creates new features
     """
     df = df.copy()
+
     
     # Betrag der symmetrischen Features
     df["abs_fAsym"] = df["fAsym"].abs()
