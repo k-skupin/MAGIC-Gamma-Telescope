@@ -157,10 +157,10 @@ def support_vector_machine_opt(features, target, threshold, cv, scoring, thresho
                                                                         'Time Elapsed (s)'])
             
     print("threshold: ", threshold)       
-    # Ausgabe des Ergebnisses
+    # print results
     print("results: ", results_bayesian_svm)
 
-    # Ausgabe der besten Parameter
+    # print best parameter
     print("best params: ", study_svm.best_params)
 
     best_params_svm = study_svm.best_params
@@ -179,7 +179,7 @@ def support_vector_machine_opt(features, target, threshold, cv, scoring, thresho
     print(f"CV Score: {cv_svm_bo.mean():.3f}")
 
     thresholds.append(threshold)
-    model_names.append('Support Vector Machine optimiert')
+    model_names.append('Support Vector Machine optimized')
     cv_scores.append(cv_svm_bo.mean())
 
     svm_pipe_bo.fit(features, target)

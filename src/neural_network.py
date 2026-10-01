@@ -191,10 +191,10 @@ def neural_network_opt(features, target, threshold, cv, scoring, thresholds, mod
                                                                         'Time Elapsed (s)'])
             
     print("threshold: ", threshold)       
-    # Ausgabe des Ergebnisses
+    # print results
     print("results: ", results_bayesian_nn)
 
-    # Ausgabe der besten Parameter
+    # print best parameter
     print("best params: ", study_nn.best_params)
 
     best_params_nn = study_nn.best_params
@@ -219,7 +219,7 @@ def neural_network_opt(features, target, threshold, cv, scoring, thresholds, mod
     print(f"CV Score: {cv_nn_bo.mean():.3f}")
 
     thresholds.append(threshold)
-    model_names.append('neural network optimiert')
+    model_names.append('neural network optimized')
     cv_scores.append(cv_nn_bo.mean())
 
     nn_pipe_bo.fit(features, target)

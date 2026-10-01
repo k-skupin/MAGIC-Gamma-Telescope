@@ -62,7 +62,7 @@ def baseline(features, target, threshold, cv, scoring, thresholds, model_names, 
     print(f"CV mean Score: {cv_log_reg_bl.mean():.3f}")
 
     thresholds.append(threshold)
-    model_names.append('logistische Regression Baseline')
+    model_names.append('logistic regression baseline')
     cv_scores.append(cv_log_reg_bl.mean())
 
     # fit pipeline 

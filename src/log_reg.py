@@ -64,7 +64,7 @@ def logistic_regression(features, target, threshold, cv, scoring, thresholds, mo
     print(f"CV mean Score: {cv_log_reg.mean():.3f}")
     
     thresholds.append(threshold)
-    model_names.append('logistische Regression simple')
+    model_names.append('logistic regression simple')
     cv_scores.append(cv_log_reg.mean())
     
     # fit pipeline 
@@ -236,10 +236,10 @@ def logistic_regression_opt(features, target, threshold, cv, scoring, thresholds
                                                                             'Time Elapsed (s)'])
             
     print("threshold: ", threshold)       
-    # Ausgabe des Ergebnisses
+    # print results
     print("results: ", results_bayesian_log_reg)
 
-    # Ausgabe der besten Parameter
+    # print best parameter
     print("best params: ", study_log_reg.best_params)
 
     best_params_log_reg = study_log_reg.best_params
@@ -255,11 +255,11 @@ def logistic_regression_opt(features, target, threshold, cv, scoring, thresholds
                                 cv=cv,
                                 scoring=scoring[threshold],
                                 n_jobs=-1)
-    #print(cv_log_reg_bo.mean())
+
     print(f"CV Score: {cv_log_reg_bo.mean():.3f}")
 
     thresholds.append(threshold)
-    model_names.append('Logistische Regression optimiert')
+    model_names.append('Logistic regression optimized')
     cv_scores.append(cv_log_reg_bo.mean())
 
     log_reg_pipe_bo.fit(features, target)

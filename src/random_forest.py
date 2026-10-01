@@ -156,10 +156,10 @@ def random_forest_opt(features, target, threshold, cv, scoring, thresholds, mode
                                                                             'Time Elapsed (s)'])
             
     print("threshold: ", threshold)       
-    # Ausgabe des Ergebnisses
+    # print results
     print("results: ", results_bayesian_rf)
 
-    # Ausgabe der besten Parameter
+    # print best parameter
     print("best params: ", study_rf.best_params)
 
     best_params_rf = study_rf.best_params
@@ -181,7 +181,7 @@ def random_forest_opt(features, target, threshold, cv, scoring, thresholds, mode
     print(f"CV Score: {cv_rf_bo.mean():.3f}")
 
     thresholds.append(threshold)
-    model_names.append('RandomForest optimiert')
+    model_names.append('RandomForest optimized')
     cv_scores.append(cv_rf_bo.mean())
 
     rf_pipe_bo.fit(features, target)
@@ -265,7 +265,7 @@ def random_forest_opt_2(features, target, threshold, cv, scoring, thresholds, mo
                                                                             'Time Elapsed (s)'])
     
     print("threshold: ", threshold)       
-    # Ausgabe des Ergebnisses
+    # print results
     print("results: ", results_bayesian_rf_2)
     
     best_params_rf_2 = study_rf_2.best_params
@@ -290,7 +290,7 @@ def random_forest_opt_2(features, target, threshold, cv, scoring, thresholds, mo
     print(f"CV Score: {cv_rf_bo_2.mean():.3f}")
     
     thresholds.append(threshold)
-    model_names.append('RandomForest optimiert 2')
+    model_names.append('RandomForest optimized 2')
     cv_scores.append(cv_rf_bo_2.mean())
 
     rf_pipe_bo_2.fit(features, target)
