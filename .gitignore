@@ -20,3 +20,12 @@ wheels/
 
 # txt-Dateien
 *.txt
+
+# trained models
+/models/
+*.p
+*.pkl
+*.joblib
+
+# Entwicklungsnotebook mit nur einer Schwelle
+/notebooks/Gamma_models.ipynb
