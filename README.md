@@ -301,7 +301,7 @@ Higher values indicate a higher True Positive Rate while respecting the correspo
 maximum False Positive Rate.
 
 <p align="center">
-  <img src="results/figures/model_perfomance_heat_map.png"
+  <img src="results/figures/model_performance_heat_map.png"
        alt="Cross-validation model comparison heatmap"
        width="900">
 </p>
