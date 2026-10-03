@@ -43,8 +43,7 @@ def logistic_regression(features, target, threshold, cv, scoring, thresholds, mo
         solver="lbfgs",  
         max_iter=10000,
         random_state=42,
-        class_weight='balanced', 
-        n_jobs=-1
+        class_weight='balanced'
     )
 
 
@@ -113,8 +112,7 @@ def logistic_regression_pca(features, target, threshold, cv, scoring, thresholds
         solver="lbfgs",  
         max_iter=10000,
         random_state=42,
-        class_weight='balanced', 
-        n_jobs=-1
+        class_weight='balanced'
     )
 
 
@@ -181,13 +179,12 @@ def logistic_regression_opt(features, target, threshold, cv, scoring, thresholds
         solver="liblinear",  
         max_iter=10000,
         random_state=42,
-        class_weight='balanced', 
-        n_jobs=-1
+        class_weight='balanced'
     )
 
     # Instantiating pipeline for optimization
     log_reg_pipe_opt = Pipeline(steps = [('scaler', StandardScaler()), 
-                                    ('pca', PCA()),
+                                    ('pca', PCA(random_state=42)),
                                     ('model', log_reg)])
 
     # tune hyperparameters with Bayesian Optimization

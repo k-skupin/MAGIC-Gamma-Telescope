@@ -290,7 +290,7 @@ def random_forest_opt_2(features, target, threshold, cv, scoring, thresholds, mo
     print(f"CV Score: {cv_rf_bo_2.mean():.3f}")
     
     thresholds.append(threshold)
-    model_names.append('RandomForest optimized 2')
+    model_names.append('RandomForest opt 2')
     cv_scores.append(cv_rf_bo_2.mean())
 
     rf_pipe_bo_2.fit(features, target)

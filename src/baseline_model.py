@@ -55,7 +55,8 @@ def baseline(features, target, threshold, cv, scoring, thresholds, model_names, 
                                 X=features[baseline_features],
                                 y=target,
                                 cv=cv,
-                                scoring=scoring[threshold])
+                                scoring=scoring[threshold],
+                                n_jobs=-1)
 
 
     print("treshold: ", threshold)

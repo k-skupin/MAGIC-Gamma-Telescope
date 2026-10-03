@@ -1,0 +1,56 @@
+threshold,Modell,Datei,CV Score
+tpr_fpr_001,neural network optimized,..\models\nn__opt_tpr_fpr_001.p,0.36093581763802446
+tpr_fpr_001,RandomForest opt 2,..\models\rf__opt_2_tpr_fpr_001.p,0.3507708350173794
+tpr_fpr_001,RandomForest optimized,..\models\rf__opt_tpr_fpr_001.p,0.3444823377253253
+tpr_fpr_001,NN simple,..\models\nn_tpr_fpr_001.p,0.33801608600759836
+tpr_fpr_001,RandomForest simple,..\models\rf_tpr_fpr_001.p,0.3247950044458815
+tpr_fpr_001,Support Vector Machine optimized,..\models\svm__opt_tpr_fpr_001.p,0.24271833319860966
+tpr_fpr_001,SVM simple,..\models\svm_tpr_fpr_001.p,0.17664610783283488
+tpr_fpr_001,Logistic regression optimized,..\models\log_reg__opt_tpr_fpr_001.p,0.13196875757820709
+tpr_fpr_001,logistische Regression PCA,..\models\log_reg_pca_tpr_fpr_001.p,0.05654676258992806
+tpr_fpr_001,logistic regression baseline,..\models\log_reg_bl_tpr_fpr_001.p,0.0540277665508043
+tpr_fpr_001,logistic regression simple,..\models\log_reg_tpr_fpr_001.p,0.05195929997574974
+tpr_fpr_002,RandomForest opt 2,..\models\rf__opt_2_tpr_fpr_002.p,0.447318810120443
+tpr_fpr_002,neural network optimized,..\models\nn__opt_tpr_fpr_002.p,0.4422877697841727
+tpr_fpr_002,RandomForest optimized,..\models\rf__opt_tpr_fpr_002.p,0.4382385821679735
+tpr_fpr_002,RandomForest simple,..\models\rf_tpr_fpr_002.p,0.4311436019723547
+tpr_fpr_002,NN simple,..\models\nn_tpr_fpr_002.p,0.42727851426723795
+tpr_fpr_002,Support Vector Machine optimized,..\models\svm__opt_tpr_fpr_002.p,0.3790032333683615
+tpr_fpr_002,SVM simple,..\models\svm_tpr_fpr_002.p,0.3092437151402473
+tpr_fpr_002,Logistic regression optimized,..\models\log_reg__opt_tpr_fpr_002.p,0.19058075337482822
+tpr_fpr_002,logistic regression baseline,..\models\log_reg_bl_tpr_fpr_002.p,0.12441718535284133
+tpr_fpr_002,logistische Regression PCA,..\models\log_reg_pca_tpr_fpr_002.p,0.12396798965322124
+tpr_fpr_002,logistic regression simple,..\models\log_reg_tpr_fpr_002.p,0.11623571255355265
+tpr_fpr_005,RandomForest opt 2,..\models\rf__opt_2_tpr_fpr_005.p,0.6485038396249293
+tpr_fpr_005,RandomForest optimized,..\models\rf__opt_tpr_fpr_005.p,0.6358300460754992
+tpr_fpr_005,RandomForest simple,..\models\rf_tpr_fpr_005.p,0.6143454045752161
+tpr_fpr_005,neural network optimized,..\models\nn__opt_tpr_fpr_005.p,0.6121003152534152
+tpr_fpr_005,NN simple,..\models\nn_tpr_fpr_005.p,0.5827070568264489
+tpr_fpr_005,Support Vector Machine optimized,..\models\svm__opt_tpr_fpr_005.p,0.5541177350254628
+tpr_fpr_005,SVM simple,..\models\svm_tpr_fpr_005.p,0.535058523967343
+tpr_fpr_005,Logistic regression optimized,..\models\log_reg__opt_tpr_fpr_005.p,0.34214618866704394
+tpr_fpr_005,logistic regression simple,..\models\log_reg_tpr_fpr_005.p,0.3107671570608682
+tpr_fpr_005,logistic regression baseline,..\models\log_reg_bl_tpr_fpr_005.p,0.30106070649098704
+tpr_fpr_005,logistische Regression PCA,..\models\log_reg_pca_tpr_fpr_005.p,0.2732857085118422
+tpr_fpr_010,RandomForest opt 2,..\models\rf__opt_2_tpr_fpr_010.p,0.798095465200873
+tpr_fpr_010,RandomForest optimized,..\models\rf__opt_tpr_fpr_010.p,0.7955769137498988
+tpr_fpr_010,RandomForest simple,..\models\rf_tpr_fpr_010.p,0.7820033950367795
+tpr_fpr_010,neural network optimized,..\models\nn__opt_tpr_fpr_010.p,0.774452226982459
+tpr_fpr_010,Support Vector Machine optimized,..\models\svm__opt_tpr_fpr_010.p,0.757553148492442
+tpr_fpr_010,NN simple,..\models\nn_tpr_fpr_010.p,0.7526098536900816
+tpr_fpr_010,SVM simple,..\models\svm_tpr_fpr_010.p,0.7499106377819093
+tpr_fpr_010,Logistic regression optimized,..\models\log_reg__opt_tpr_fpr_010.p,0.5516003152534152
+tpr_fpr_010,logistic regression simple,..\models\log_reg_tpr_fpr_010.p,0.5504327055209765
+tpr_fpr_010,logistic regression baseline,..\models\log_reg_bl_tpr_fpr_010.p,0.4942458572467868
+tpr_fpr_010,logistische Regression PCA,..\models\log_reg_pca_tpr_fpr_010.p,0.49110047692183334
+tpr_fpr_020,RandomForest opt 2,..\models\rf__opt_2_tpr_fpr_020.p,0.9311410152776656
+tpr_fpr_020,RandomForest optimized,..\models\rf__opt_tpr_fpr_020.p,0.9269155686686605
+tpr_fpr_020,RandomForest simple,..\models\rf_tpr_fpr_020.p,0.9172964998787487
+tpr_fpr_020,Support Vector Machine optimized,..\models\svm__opt_tpr_fpr_020.p,0.9157685312424219
+tpr_fpr_020,neural network optimized,..\models\nn__opt_tpr_fpr_020.p,0.9134307654999596
+tpr_fpr_020,SVM simple,..\models\svm_tpr_fpr_020.p,0.9074983428987148
+tpr_fpr_020,NN simple,..\models\nn_tpr_fpr_020.p,0.903902190607065
+tpr_fpr_020,Logistic regression optimized,..\models\log_reg__opt_tpr_fpr_020.p,0.768520491471991
+tpr_fpr_020,logistic regression simple,..\models\log_reg_tpr_fpr_020.p,0.7677111793711099
+tpr_fpr_020,logistic regression baseline,..\models\log_reg_bl_tpr_fpr_020.p,0.7212340958693719
+tpr_fpr_020,logistische Regression PCA,..\models\log_reg_pca_tpr_fpr_020.p,0.7169202570527847

@@ -29,3 +29,6 @@ wheels/
 
 # Entwicklungsnotebook mit nur einer Schwelle
 /notebooks/Gamma_models.ipynb
+
+# Datenwörterbuch
+/notebooks/Datenwörterbuch.ipynb

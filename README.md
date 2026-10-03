@@ -18,7 +18,38 @@ Gamma  → 1
 Hadron → 0
 ```
 
+## Dataset
+
+The MAGIC Gamma Telescope dataset contains approximately 19,000 simulated
+atmospheric shower events and ten numerical image parameters.
+
+The objective is to distinguish between gamma-ray induced showers and
+hadronic background events.
+
+### Target Variable
+
+| Target | Meaning | Encoded Value |
+|---|---|---:|
+| Gamma (`g`) | Gamma-ray induced shower / signal | `1` |
+| Hadron (`h`) | Hadronic cosmic-ray shower / background | `0` |
+
+### Data Dictionary
 The dataset contains approximately **19,000 observations** and **10 original numerical features** describing the geometry, intensity, concentration, and orientation of the recorded shower images.
+
+| Feature | Type | Unit | Technical Description | Intuitive Interpretation |
+|---|---|---:|---|---|
+| `fLength` | Continuous | mm | Length of the major axis of the fitted ellipse. | Describes how long the recorded shower image is along its main axis. |
+| `fWidth` | Continuous | mm | Length of the minor axis of the fitted ellipse. | Describes how wide the shower image is perpendicular to its main axis. |
+| `fSize` | Continuous | #phot (log-transformed) | Base-10 logarithm of the total light content of all pixels in the image. | Represents the overall amount of light recorded for the event. Higher values correspond to brighter or more intense shower images. |
+| `fConc` | Continuous | – | Ratio of the summed light intensity of the two brightest pixels to the total image intensity. | Measures how strongly the detected light is concentrated in the two brightest pixels. A high value indicates that a large fraction of the light is concentrated in only a few pixels. |
+| `fConc1` | Continuous | – | Ratio of the light intensity of the brightest pixel to the total image intensity. | Measures how strongly the brightest individual pixel dominates the total recorded light. |
+| `fAsym` | Continuous | mm | Position of the brightest pixel relative to the ellipse center, projected onto the major axis. | Describes where the brightest pixel is located along the main axis of the shower image and therefore provides information about longitudinal asymmetry. |
+| `fM3Long` | Continuous | mm | Cube root of the third moment of the light distribution along the major axis. | Describes the asymmetry of the light distribution along the long axis of the ellipse. Positive and negative values indicate asymmetry toward opposite directions. |
+| `fM3Trans` | Continuous | mm | Cube root of the third moment of the light distribution along the minor axis. | Similar to `fM3Long`, but measures asymmetry perpendicular to the main axis and therefore captures lateral asymmetry of the shower image. |
+| `fAlpha` | Continuous | degrees | Angle between the major axis of the ellipse and the line connecting the ellipse center with the camera center. | Indicates how well the shower image points toward the center of the camera. Small values mean that the major axis is closely aligned with the camera center. |
+| `fDist` | Continuous | mm | Distance between the center of the fitted ellipse and the center of the camera. | Describes how far the shower image is located from the camera center. |
+
+All ten features contain no missing values.
 
 ---
 
@@ -48,10 +79,6 @@ FPR ≤ 0.20
 ```
 
 A custom scorer was implemented to determine the maximum achievable TPR for each FPR limit.
-
-An FPR limit of **5% (`FPR ≤ 0.05`)** is used as the primary model-selection metric, while the remaining operating points are evaluated as additional performance criteria.
-
-ROC-AUC is also considered as a complementary global performance metric.
 
 ---
 
@@ -123,7 +150,7 @@ alpha_alignment
 The engineered features represent additional information about:
 
 - shower-image geometry
-- absolute values of asymmetric features
+- absolute values of symmetric features
 - light concentration
 - dominance of the brightest pixel compared with the two brightest pixels
 - alignment of the shower image with the camera center
@@ -379,36 +406,54 @@ project/
 │
 ├── data/
 │   ├── raw/
-│   │   └── original dataset
+│   │   ├── magic04.data
+|   |   |   └── raw data
+|   |   └── magic04.names
+|   |       └── additional information about dataset
 │   │
 │   └── processed/
 │       └── prepared datasets
 │
 ├── notebooks/
-│   ├── exploratory data analysis
-│   ├── preprocessing and feature engineering
-│   ├── model comparison
-│   ├── hyperparameter optimization
-│   └── final model evaluation
-│
-├── src/
-│   ├── features.py
-│   │   └── reusable feature-engineering functions
+│   ├── Gamma_EDA.ipynb
+│   │   └── Exploratory data analysis and feature investigation
 │   │
-│   ├── metrics.py
-│   │   └── custom TPR-at-FPR scoring functions
-│   │
-│   ├── baseline_model.py
-│   │   └── baseline-model implementation
-│   │
-│   └── additional reusable project functions
-│
-├── models/
-│   └── serialized fitted models
-│
+│   └── Gamma_models_thresholds.ipynb
+│       └── Training, comparison, validation and interpretation of models for different threshold values for fpr
+|
 ├── results/
-│   ├── figures/
-│   └── tables/
+|   ├── figures/
+|   | 
+|   |  
+|   └── tables/
+|       ├── score_overview.csv
+|       |   └── CV scores for different fpr thresholds and models
+|       |
+|       └── score_table.csv
+|           └── Data used for heatmap representation of fpr threshold and models
+|
+├── src/
+|   |
+|   ├── baseline_model.py
+|   |   └── Baseline-model implementation
+|   |
+│   ├── features.py
+│   │   └── Reusable feature-engineering functions
+|   |
+|   ├── log_reg.py
+|   |   └── implementation of different logistic regression models with and without optimization
+│   │
+|   ├── neural_network.py
+|   |   └── implementation of different neural network models with and without optimization
+|   |
+|   ├── random_forest.py
+|   |   └── implementation of different random forest models with and without optimization
+
+│   ├── resample.py
+│   │   └── test of different resample strategies
+│   │
+│   └── support_vector_machine.py
+│       └── implementation of different SVM models with and without optimization
 │
 ├── pyproject.toml
 ├── .gitignore
@@ -419,7 +464,6 @@ The notebooks contain the analysis, experiments, visualizations, and interpretat
 
 Reusable functionality is moved into the `src/` directory to separate implementation details from the analytical workflow and to avoid duplicated code.
 
-The `models/` directory contains serialized fitted models for the different FPR operating points.
 
 ---
 
@@ -461,7 +505,7 @@ Feature Engineering
 Baseline Model
    │
    ▼
-Model Comparison
+Initial Model Training
    │
    ├── Logistic Regression
    ├── Support Vector Machine
@@ -471,33 +515,33 @@ Model Comparison
    ▼
 Bayesian Hyperparameter Optimization
    │
+   ├── Optimized Logistic Regression
+   ├── Optimized Support Vector Machine
+   ├── Optimized Neural Network
+   └── Optimized Random Forest
+   │
+   ▼
+Model Comparison
+   │
+   ├── Baseline model
+   ├── Simple models
+   └── Optimized models
+   │
    ▼
 Cross-Validation Model Selection
    │
    ▼
-Final Random Forest Models
+Best Model for Each FPR Operating Point
    │
    ▼
 Independent Test Evaluation
    │
    ▼
-Learning Curves & Feature Importance
+Learning Curves
+   │
+   ▼
+Feature Importance Analysis
 ```
-
----
-
-## Future Work
-
-Possible extensions of the project include:
-
-- grouped permutation importance for strongly correlated features
-- evaluation of gradient-boosting methods
-- further optimization of the very low-FPR region
-- nested cross-validation for a more rigorous estimate of model-selection uncertainty
-- investigation of probability calibration
-- explicit operating-threshold selection on validation data
-- validation using additional or real telescope observations
-- comparison with modern boosting algorithms such as XGBoost, LightGBM, or CatBoost
 
 ---
 
