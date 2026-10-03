@@ -301,7 +301,7 @@ Higher values indicate a higher True Positive Rate while respecting the correspo
 maximum False Positive Rate.
 
 <p align="center">
-  <img src="results/figures/model_perfomance_heatmap.png"
+  <img src="results/figures/model_perfomance_heat_map.png"
        alt="Cross-validation model comparison heatmap"
        width="900">
 </p>
@@ -359,18 +359,14 @@ The validation curves continue to improve with increasing training-set size, sug
 that additional training data could still improve performance, particularly at stricter
 operating points.
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="results/figures/learning_curve_fpr005.png" width="100%"><br>
-      <b>FPR ≤ 0.05</b>
-    </td>
-    <td align="center">
-      <img src="results/figures/learning_curve_fpr020.png" width="100%"><br>
-      <b>FPR ≤ 0.20</b>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="results/figures/learning_curve_tpr_fpr005.png"
+       alt="Learning curve for FPR 0.05"
+       width="48%">
+  <img src="results/figures/learning_curve_tpr_fpr020.png"
+       alt="Learning curve for FPR 0.20"
+       width="48%">
+</p>
 
 ### Feature Importance
 
