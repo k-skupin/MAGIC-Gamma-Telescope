@@ -128,6 +128,15 @@ This motivated the evaluation of nonlinear machine-learning models such as **Sup
 
 The analysis also indicated that the orientation of the shower image relative to the camera center plays an important role in separating gamma and hadron events.
 
+<p align="center">
+  <img src="results/figures/eda_feature_distributions.png"
+       alt="Class-dependent distributions of selected MAGIC features"
+       width="900">
+</p>
+
+Selected feature distributions reveal clear class-dependent patterns.
+The strongest univariate separation is visible for fAlpha, while morphological features such as fLength and fWidth show broader distributional differences between gamma and hadron events. These patterns indicate that multiple complementary image properties contribute to the classification task.
+
 ---
 
 ## Feature Engineering
@@ -285,87 +294,107 @@ This ensures that the test set remains an independent estimate of model generali
 
 The test data are **not used to fit or optimize the models**.
 
+The following heatmap summarizes the cross-validation performance of the evaluated
+model variants across the investigated FPR operating points.
+
+Higher values indicate a higher True Positive Rate while respecting the corresponding
+maximum False Positive Rate.
+
+<p align="center">
+  <img src="results/figures/model_perfomance_heatmap.png"
+       alt="Cross-validation model comparison heatmap"
+       width="900">
+</p>
+
+The comparison shows that the nonlinear models outperform the linear baseline,
+with the optimized Random Forest achieving the strongest overall performance
+across the relevant operating points.
+
 ---
 
 ## Learning Curves
 
-Learning curves are used to investigate the bias-variance behavior of the final models.
+### Learning Curves
 
-The results show that the classification problem becomes increasingly difficult at very restrictive False Positive Rates.
+The learning curves show that model generalization strongly depends on the selected
+FPR operating point.
 
-For low FPR limits such as:
+At the stricter operating point of **FPR ≤ 0.05**, the Random Forest achieves nearly
+perfect training performance while validation performance remains considerably lower.
+This indicates a high-variance regime and shows how difficult it is to maintain high
+gamma efficiency while strongly suppressing hadronic background.
 
-```text
-FPR ≤ 0.01
-FPR ≤ 0.02
-```
+At **FPR ≤ 0.20**, the validation score approaches the training score much more closely,
+indicating substantially better generalization.
 
-a relatively large gap between training and validation performance can be observed.
+The validation curves continue to improve with increasing training-set size, suggesting
+that additional training data could still improve performance, particularly at stricter
+operating points.
 
-This indicates higher model variance and reflects the increased difficulty and statistical sensitivity of the classification task in the low-FPR region.
-
-For less restrictive operating points, especially `FPR ≤ 0.20`, the validation performance approaches the training performance more closely.
-
-The validation curves are still increasing with additional training data for several operating points, indicating that additional observations could further improve model performance.
-
+<p align="center">
+  <img src="results/figures/learning_curves_fpr005_020.png"
+       alt="Learning curves for FPR 0.05 and 0.20"
+       width="850">
+</p>
 ---
 
 ## Feature Importance
 
-Two complementary approaches are used to analyze the contribution of individual features.
+## Model Interpretation
 
-### Random Forest Feature Importance
+### Learning Curves
 
-The built-in Random Forest feature importance measures how strongly individual features contribute to impurity reduction within the decision trees.
+The learning curves show that model generalization strongly depends on the selected
+FPR operating point.
 
-Across the different FPR operating points, the importance patterns are relatively stable.
+At the stricter operating point of **FPR ≤ 0.05**, the Random Forest achieves nearly
+perfect training performance while validation performance remains considerably lower.
+This indicates a high-variance regime and shows how difficult it is to maintain high
+gamma efficiency while strongly suppressing hadronic background.
 
-The most important information is related to:
+At **FPR ≤ 0.20**, the validation score approaches the training score much more closely,
+indicating substantially better generalization.
 
-- shower-image orientation
-- image size
-- image morphology
-- light concentration
+The validation curves continue to improve with increasing training-set size, suggesting
+that additional training data could still improve performance, particularly at stricter
+operating points.
 
-In particular, the original feature `fAlpha` and the engineered feature `alpha_alignment` show high importance.
+<table>
+  <tr>
+    <td align="center">
+      <img src="results/figures/learning_curve_fpr005.png" width="100%"><br>
+      <b>FPR ≤ 0.05</b>
+    </td>
+    <td align="center">
+      <img src="results/figures/learning_curve_fpr020.png" width="100%"><br>
+      <b>FPR ≤ 0.20</b>
+    </td>
+  </tr>
+</table>
 
-Since `alpha_alignment` is derived directly from `fAlpha`, both features contain strongly overlapping information and should not be interpreted as independent physical effects.
+### Feature Importance
 
----
+Permutation feature importance was used to investigate which information contributes
+most strongly to the domain-specific TPR@FPR metric.
 
-### Permutation Feature Importance
+The results show that **image orientation**, represented mainly by `fAlpha` and
+`alpha_alignment`, is one of the strongest sources of information for distinguishing
+gamma from hadron events.
 
-Permutation Feature Importance is additionally calculated using the custom TPR-at-FPR scorer.
+Additional predictive information comes from image morphology, light concentration,
+and event size. The relative importance of these feature groups changes with the
+selected FPR operating point, indicating that increasingly strict background rejection
+requires a different combination of information.
 
-For each feature, its values are randomly permuted while all other features remain unchanged.
+Because several original and engineered features are correlated, individual importance
+values should not be interpreted independently. The results are therefore best
+interpreted at the level of feature groups.
 
-The resulting decrease in TPR measures how strongly the model depends on the information contained in that feature for the respective FPR operating point.
-
-The permutation analysis confirms the importance of the shower-image orientation and additionally highlights features related to:
-
-```text
-fAlpha / alpha_alignment
-fConc / fConc1
-fSize
-fLength
-fWidth
-width_length_ratio
-ellipse_area
-```
-
-The results indicate that the main discriminative information is related to:
-
-1. **orientation of the shower image**
-2. **light concentration**
-3. **image size**
-4. **image morphology**
-
-Several original and engineered features are strongly correlated or contain overlapping information.
-
-Therefore, individual feature-importance values should not be interpreted independently.
-
-Features with very small or slightly negative permutation importance do not necessarily contain harmful information. Small negative values can result from statistical variation or redundancy with other features.
-
+<p align="center">
+  <img src="results/figures/permutation_feature_importance.png"
+       alt="Permutation feature importance across FPR operating points"
+       width="850">
+</p>
 ---
 
 ## Main Findings
@@ -423,7 +452,28 @@ project/
 |
 ├── results/
 |   ├── figures/
-|   | 
+|   |   ├── eda_feature_distributions.png
+|   |   |   └── distribution of selected features by class
+|   |   |
+|   |   ├── learning_curve_for_tpr_fpr_001.png
+|   |   |   └── Learning curve for final model with FPR operating point 0.01
+|   |   |
+|   |   ├── learning_curve_for_tpr_fpr_002.png
+|   |   |
+|   |   ├── learning_curve_for_tpr_fpr_005.png
+|   |   |
+|   |   ├── learning_curve_for_tpr_fpr_010.png
+|   |   |
+|   |   ├── learning_curve_for_tpr_fpr_020.png
+|   |   |
+|   |   ├── model_performance_heat_map.png
+|   |   |   └── shows comparison of results of different models at different operating points
+|   |   |
+|   |   ├── permutation_feature_importance.png
+|   |   |   └── shows which information contributes most strongly to the domain-specific TPR@FPR metric
+|   |   |
+|   |   └── random_forest_feature_importance.png
+|   |       └── shows for contribution to the domain-specific TPR@FPR metric for random forests
 |   |  
 |   └── tables/
 |       ├── score_overview.csv
