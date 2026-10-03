@@ -312,33 +312,6 @@ across the relevant operating points.
 
 ---
 
-## Learning Curves
-
-### Learning Curves
-
-The learning curves show that model generalization strongly depends on the selected
-FPR operating point.
-
-At the stricter operating point of **FPR ≤ 0.05**, the Random Forest achieves nearly
-perfect training performance while validation performance remains considerably lower.
-This indicates a high-variance regime and shows how difficult it is to maintain high
-gamma efficiency while strongly suppressing hadronic background.
-
-At **FPR ≤ 0.20**, the validation score approaches the training score much more closely,
-indicating substantially better generalization.
-
-The validation curves continue to improve with increasing training-set size, suggesting
-that additional training data could still improve performance, particularly at stricter
-operating points.
-
-<p align="center">
-  <img src="results/figures/learning_curves_fpr005_020.png"
-       alt="Learning curves for FPR 0.05 and 0.20"
-       width="850">
-</p>
----
-
-## Feature Importance
 
 ## Model Interpretation
 
@@ -360,10 +333,10 @@ that additional training data could still improve performance, particularly at s
 operating points.
 
 <p align="center">
-  <img src="results/figures/learning_curve_tpr_fpr005.png"
+  <img src="results/figures/learning_curve_tpr_fpr_005.png"
        alt="Learning curve for FPR 0.05"
        width="48%">
-  <img src="results/figures/learning_curve_tpr_fpr020.png"
+  <img src="results/figures/learning_curve_tpr_fpr_020.png"
        alt="Learning curve for FPR 0.20"
        width="48%">
 </p>
