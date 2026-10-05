@@ -7,7 +7,11 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
+.venv-dl3/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # Ordner mit alternativen Ideen
 /alternative Ideen/
@@ -27,8 +31,6 @@ wheels/
 *.pkl
 *.joblib
 
-# Entwicklungsnotebook mit nur einer Schwelle
-/notebooks/Gamma_models.ipynb
 
-# Datenwörterbuch
-/notebooks/Datenwörterbuch.ipynb
+# Datenwoerterbuch
+/Datenw*rterbuch.ipynb
