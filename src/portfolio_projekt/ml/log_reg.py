@@ -6,7 +6,8 @@ from sklearn.linear_model import LogisticRegression
 from imblearn.pipeline import Pipeline 
 from sklearn.model_selection import cross_val_score
 import pickle
-from pathlib import Path
+#from pathlib import Path
+from portfolio_projekt.paths import MODELS_DIR
 
 import optuna 
 from optuna.samplers import TPESampler
@@ -70,7 +71,7 @@ def logistic_regression(features, target, threshold, cv, scoring, thresholds, mo
     log_reg_pipe.fit(features, target)
         
     #save fitted pipeline
-    model_dir = Path("../models")
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)
     
     model_path = model_dir / f"log_reg_{threshold}.p"
@@ -141,7 +142,7 @@ def logistic_regression_pca(features, target, threshold, cv, scoring, thresholds
     log_reg_pipe_PCA.fit(features, target)
         
     #save fitted pipeline
-    model_dir = Path("../models")
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)
     
     model_path = model_dir / f"log_reg_pca_{threshold}.p"
@@ -262,7 +263,7 @@ def logistic_regression_opt(features, target, threshold, cv, scoring, thresholds
     log_reg_pipe_bo.fit(features, target)
     
      #save fitted pipeline
-    model_dir = Path("../models")
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)        
     model_path = model_dir / f"log_reg__opt_{threshold}.p"
     pickle.dump(log_reg_pipe_bo, open(model_path, 'wb'))

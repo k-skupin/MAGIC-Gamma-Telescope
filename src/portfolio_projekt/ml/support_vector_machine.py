@@ -6,7 +6,8 @@ from sklearn.svm import SVC
 from imblearn.pipeline import Pipeline 
 from sklearn.model_selection import cross_val_score
 import pickle
-from pathlib import Path
+#from pathlib import Path
+from portfolio_projekt.paths import MODELS_DIR
 
 import optuna 
 from optuna.samplers import TPESampler
@@ -65,7 +66,7 @@ def support_vector_machine(features, target, threshold, cv, scoring, thresholds,
     svm_pipe.fit(features, target)
         
     #save fitted pipeline
-    model_dir = Path("../models")
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)
     
     model_path = model_dir / f"svm_{threshold}.p"
@@ -185,7 +186,7 @@ def support_vector_machine_opt(features, target, threshold, cv, scoring, thresho
     svm_pipe_bo.fit(features, target)
     
      #save fitted pipeline
-    model_dir = Path("../models")
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)        
     model_path = model_dir / f"svm__opt_{threshold}.p"
     pickle.dump(svm_pipe_bo, open(model_path, 'wb'))

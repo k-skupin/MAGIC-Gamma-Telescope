@@ -4,6 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score
 import pickle
 from pathlib import Path
+from portfolio_projekt.paths import MODELS_DIR
 
 def baseline(features, target, threshold, cv, scoring, thresholds, model_names, files, cv_scores):
     """instantiate simple logistic regression as baseline model for a given threshold of fpr
@@ -70,7 +71,7 @@ def baseline(features, target, threshold, cv, scoring, thresholds, model_names, 
     log_reg_bl.fit(features[baseline_features], target)
     
     #save fitted pipeline
-    model_dir = Path("../models")
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)
 
     model_path = model_dir / f"log_reg_bl_{threshold}.p"

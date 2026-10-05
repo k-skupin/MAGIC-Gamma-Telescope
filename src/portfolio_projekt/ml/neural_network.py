@@ -6,7 +6,8 @@ from sklearn.neural_network import MLPClassifier
 from imblearn.pipeline import Pipeline 
 from sklearn.model_selection import cross_val_score
 import pickle
-from pathlib import Path
+#from pathlib import Path
+from portfolio_projekt.paths import MODELS_DIR
 
 import optuna 
 from optuna.samplers import TPESampler
@@ -74,7 +75,7 @@ def neural_network(features, target, threshold, cv, scoring, thresholds, model_n
     nn_pipe.fit(features, target)
         
     #save fitted pipeline
-    model_dir = Path("../models")
+    from portfolio_projekt.paths import MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)
     
     model_path = model_dir / f"nn_{threshold}.p"
@@ -225,7 +226,7 @@ def neural_network_opt(features, target, threshold, cv, scoring, thresholds, mod
     nn_pipe_bo.fit(features, target)
     
      #save fitted pipeline
-    model_dir = Path("../models")
+    from portfolio_projekt.paths import MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)        
     model_path = model_dir / f"nn__opt_{threshold}.p"
     pickle.dump(nn_pipe_bo, open(model_path, 'wb'))
