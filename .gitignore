@@ -16,6 +16,9 @@ wheels/
 # Ordner mit alternativen Ideen
 /alternative Ideen/
 
+# Ordner mit alter Arbeitsversion des DL3 Notebooks
+/notebooks/dl3_real_data/_working/
+
 # private Notizen zum Projekt in Word
 *.docx
 *.coc
