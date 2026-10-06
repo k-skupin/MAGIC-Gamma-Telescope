@@ -1,149 +1,139 @@
-# Gamma/Hadron Classification with the MAGIC Gamma Telescope Dataset
+# From Simulation to Reality: Gamma-Ray Analysis with the MAGIC Telescope
 
 ## Project Overview
 
-This project investigates the classification of gamma-ray events and hadronic background events using machine-learning methods.
+This project investigates gamma-ray event analysis with the **MAGIC (Major Atmospheric Gamma Imaging Cherenkov) Telescope** from two complementary perspectives:
 
-The dataset is based on simulated measurements from the **MAGIC (Major Atmospheric Gamma Imaging Cherenkov) Telescope** and contains image parameters describing atmospheric particle showers recorded by the telescope.
+1. **Supervised machine learning on Monte-Carlo simulated events** using the UCI MAGIC Gamma Telescope dataset.
+2. **Statistical signal extraction from real MAGIC DL3 observations** using publicly available Crab Nebula data.
 
-The main objective is to distinguish between:
+The first part addresses the classification of gamma-ray induced air showers and hadronic background events based on reconstructed shower-image parameters.
 
-- **Gamma events (`g`)** → signal
-- **Hadron events (`h`)** → background
+The second part moves from simulation to real telescope observations. Real DL3 events do **not** provide per-event gamma/hadron ground-truth labels, so the analysis uses an **ON/OFF background-estimation approach** instead of supervised classification.
 
-The original target labels are converted to:
+Together, both parts illustrate an important challenge in scientific machine learning:
 
-```text
-Gamma  → 1
-Hadron → 0
-```
+> A model can be trained and evaluated with ground truth in simulation, while real observations require statistical inference and careful treatment of background.
 
-## Dataset
-
-The MAGIC Gamma Telescope dataset contains approximately 19,000 simulated
-atmospheric shower events and ten numerical image parameters.
-
-The objective is to distinguish between gamma-ray induced showers and
-hadronic background events.
-
-### Target Variable
-
-| Target | Meaning | Encoded Value |
-|---|---|---:|
-| Gamma (`g`) | Gamma-ray induced shower / signal | `1` |
-| Hadron (`h`) | Hadronic cosmic-ray shower / background | `0` |
-
-### Data Dictionary
-The dataset contains approximately **19,000 observations** and **10 original numerical features** describing the geometry, intensity, concentration, and orientation of the recorded shower images.
-
-| Feature | Type | Unit | Technical Description | Intuitive Interpretation |
-|---|---|---:|---|---|
-| `fLength` | Continuous | mm | Length of the major axis of the fitted ellipse. | Describes how long the recorded shower image is along its main axis. |
-| `fWidth` | Continuous | mm | Length of the minor axis of the fitted ellipse. | Describes how wide the shower image is perpendicular to its main axis. |
-| `fSize` | Continuous | #phot (log-transformed) | Base-10 logarithm of the total light content of all pixels in the image. | Represents the overall amount of light recorded for the event. Higher values correspond to brighter or more intense shower images. |
-| `fConc` | Continuous | – | Ratio of the summed light intensity of the two brightest pixels to the total image intensity. | Measures how strongly the detected light is concentrated in the two brightest pixels. A high value indicates that a large fraction of the light is concentrated in only a few pixels. |
-| `fConc1` | Continuous | – | Ratio of the light intensity of the brightest pixel to the total image intensity. | Measures how strongly the brightest individual pixel dominates the total recorded light. |
-| `fAsym` | Continuous | mm | Position of the brightest pixel relative to the ellipse center, projected onto the major axis. | Describes where the brightest pixel is located along the main axis of the shower image and therefore provides information about longitudinal asymmetry. |
-| `fM3Long` | Continuous | mm | Cube root of the third moment of the light distribution along the major axis. | Describes the asymmetry of the light distribution along the long axis of the ellipse. Positive and negative values indicate asymmetry toward opposite directions. |
-| `fM3Trans` | Continuous | mm | Cube root of the third moment of the light distribution along the minor axis. | Similar to `fM3Long`, but measures asymmetry perpendicular to the main axis and therefore captures lateral asymmetry of the shower image. |
-| `fAlpha` | Continuous | degrees | Angle between the major axis of the ellipse and the line connecting the ellipse center with the camera center. | Indicates how well the shower image points toward the center of the camera. Small values mean that the major axis is closely aligned with the camera center. |
-| `fDist` | Continuous | mm | Distance between the center of the fitted ellipse and the center of the camera. | Describes how far the shower image is located from the camera center. |
-
-All ten features contain no missing values.
+The project therefore combines machine learning, domain-specific evaluation, scientific data analysis, and the transition from simulated to real-world data.
 
 ---
 
-## Evaluation Metric
+## Research Questions
 
-Accuracy is not an appropriate primary performance metric for this problem.
+1. How accurately can gamma-ray events be separated from hadronic background using simulated MAGIC shower-image parameters?
+2. How does model performance change when very low false-positive rates are required?
+3. How does the supervised simulation-based classification problem relate to the analysis of real MAGIC telescope observations where event-level ground truth is unavailable?
 
-Misclassifying a hadronic background event as a gamma event is more critical than rejecting a true gamma event. Therefore, classification performance is evaluated at predefined limits of the **False Positive Rate (FPR)**.
+---
+
+## Data Sources
+
+### 1. Simulated MAGIC events — UCI Machine Learning Repository
+
+The machine-learning part uses the **MAGIC Gamma Telescope** dataset from the UCI Machine Learning Repository:
+
+- 19,020 Monte-Carlo simulated events
+- 10 numerical shower-image parameters
+- binary target: gamma (`g`) or hadron (`h`)
+- no missing values
+
+Source: [UCI MAGIC Gamma Telescope](https://archive.ics.uci.edu/dataset/159/magic+gamma+telescope)  
+DOI: [10.24432/C52C8B](https://doi.org/10.24432/C52C8B)
+
+### 2. Real MAGIC observations — DL3 Public Data Release 1
+
+The real-data part uses the **MAGIC Data Level 3 (DL3) Public Data Release 1**, containing approximately 60 hours of Crab Nebula observations acquired between 2013 and 2018.
+
+Source: [MAGIC DL3 Public Data Release 1 on Zenodo](https://zenodo.org/records/11108474)  
+DOI: [10.5281/zenodo.11108474](https://doi.org/10.5281/zenodo.11108474)
+
+The DL3 files follow the Gamma Astro Data Formats (GADF) convention and contain reconstructed event quantities and instrument response functions.
+
+---
+
+## Part I — Gamma/Hadron Classification on Simulated Data
+
+### Dataset and Target
+
+The UCI dataset contains ten original numerical features describing the geometry, intensity, concentration, asymmetry, and orientation of recorded shower images.
+
+| Feature | Unit | Description |
+|---|---:|---|
+| `fLength` | mm | Length of the major axis of the fitted shower ellipse |
+| `fWidth` | mm | Length of the minor axis |
+| `fSize` | #phot (log) | Logarithmic total light content |
+| `fConc` | – | Fraction of light in the two brightest pixels |
+| `fConc1` | – | Fraction of light in the brightest pixel |
+| `fAsym` | mm | Position of the brightest pixel along the major axis |
+| `fM3Long` | mm | Third-moment information along the major axis |
+| `fM3Trans` | mm | Third-moment information along the minor axis |
+| `fAlpha` | deg | Orientation of the shower ellipse relative to the camera center |
+| `fDist` | mm | Distance of the ellipse center from the camera center |
+
+Target encoding:
+
+| Target | Meaning | Encoded value |
+|---|---|---:|
+| Gamma (`g`) | signal | `1` |
+| Hadron (`h`) | background | `0` |
+
+The simulated sample contains more gamma than hadron events. In real telescope data, however, background events are much more abundant. This makes background rejection particularly important.
+
+---
+
+### Why Accuracy Is Not the Main Metric
+
+A generic classification accuracy is not sufficient for this problem.
+
+A **false positive** corresponds to a hadronic background event being accepted as a gamma candidate. In gamma-ray astronomy, such background contamination can be more problematic than rejecting some true gamma events.
 
 With gamma events defined as the positive class:
 
-- **False Positive Rate (FPR):** proportion of hadron events incorrectly classified as gamma events
-- **True Positive Rate (TPR):** proportion of gamma events correctly identified as gamma events
+- **False Positive Rate (FPR):** fraction of hadron events incorrectly classified as gamma
+- **True Positive Rate (TPR):** fraction of gamma events correctly identified as gamma
+- **TPR** is also referred to as recall or gamma efficiency
 
-The TPR is also referred to as **Recall** or **Gamma Efficiency**.
-
-The objective is therefore to maximize the TPR while keeping the FPR below a predefined limit.
-
-The following operating points are evaluated:
+The project therefore evaluates the maximum achievable TPR under predefined FPR constraints:
 
 ```text
-FPR ≤ 0.01
-FPR ≤ 0.02
-FPR ≤ 0.05
-FPR ≤ 0.10
-FPR ≤ 0.20
+FPR <= 0.01
+FPR <= 0.02
+FPR <= 0.05
+FPR <= 0.10
+FPR <= 0.20
 ```
 
-A custom scorer was implemented to determine the maximum achievable TPR for each FPR limit.
+A custom scorer is used to determine the best TPR that satisfies each FPR limit.
+
+This shifts model optimization toward the scientifically relevant region of the ROC curve instead of optimizing a generic metric such as accuracy.
 
 ---
 
-## Data Preparation
+### Exploratory Data Analysis
 
-The dataset does not contain any missing values, so no data imputation is required.
+The exploratory analysis examines:
 
-No implausible outliers were identified. Extreme values observed during the univariate analysis were retained because they did not appear anomalous when examined in a multivariate context.
-
-The target classes are slightly imbalanced:
-
-```text
-Gamma events:  approximately 65%
-Hadron events: approximately 35%
-```
-
-Different approaches for handling the class imbalance were compared using logistic regression.
-
-These included different resampling strategies as well as class weighting.
-
-Since the evaluated approaches showed very similar performance, the subsequent models use:
-
-```python
-class_weight="balanced"
-```
-
-This provides a simple way of accounting for the class imbalance without generating synthetic observations.
-
----
-
-## Exploratory Data Analysis
-
-The exploratory data analysis focuses on:
-
-- feature distributions
-- class-dependent distributions
+- class-dependent feature distributions
+- correlations and potential feature redundancy
 - potential outliers
-- correlations between features
 - nonlinear relationships
-- multivariate feature relationships
-- potential feature redundancy
+- multivariate feature interactions
 - physically motivated feature engineering
 
-Several nonlinear relationships between the original features were identified during the EDA.
-
-This motivated the evaluation of nonlinear machine-learning models such as **Support Vector Machines** and **Random Forests**.
-
-The analysis also indicated that the orientation of the shower image relative to the camera center plays an important role in separating gamma and hadron events.
+Several nonlinear relationships are visible in the original features. The orientation feature `fAlpha` shows particularly strong univariate separation between the two classes, while image morphology and light-concentration variables provide complementary information.
 
 <p align="center">
-  <img src="results/figures/eda_feature_distributions.png"
+  <img src="results/ml/figures/eda_feature_distributions.png"
        alt="Class-dependent distributions of selected MAGIC features"
        width="900">
 </p>
 
-Selected feature distributions reveal clear class-dependent patterns.
-The strongest univariate separation is visible for fAlpha, while morphological features such as fLength and fWidth show broader distributional differences between gamma and hadron events. These patterns indicate that multiple complementary image properties contribute to the classification task.
-
 ---
 
-## Feature Engineering
+### Feature Engineering
 
-Several additional features were derived from the original telescope parameters.
-
-Examples include:
+Additional features were derived from the original telescope parameters, including:
 
 ```text
 width_length_ratio
@@ -156,244 +146,327 @@ brightest_pixel_share
 alpha_alignment
 ```
 
-The engineered features represent additional information about:
+These engineered features capture additional information about:
 
 - shower-image geometry
-- absolute values of symmetric features
+- absolute asymmetry
 - light concentration
-- dominance of the brightest pixel compared with the two brightest pixels
+- relative dominance of bright pixels
 - alignment of the shower image with the camera center
 
-For example, `alpha_alignment` transforms the original `fAlpha` feature from a range of 0–90° into a range of 0–1:
+For example, `alpha_alignment` maps the original `fAlpha` orientation into an intuitive 0–1 representation in which larger values correspond to stronger alignment with the camera center.
+
+---
+
+### Modeling Strategy
+
+Model selection is based on **stratified cross-validation** on the training data. The independent test set remains untouched during feature engineering, hyperparameter tuning, and model selection.
+
+The following model families are evaluated:
+
+#### Logistic Regression
+
+Used as the linear baseline and evaluated:
+
+- without PCA
+- with PCA
+- after Bayesian hyperparameter optimization
+
+#### Support Vector Machine
+
+A nonlinear SVM is investigated because the exploratory analysis indicates nonlinear decision boundaries.
+
+Important hyperparameters such as `C` and `gamma` are optimized.
+
+#### Neural Network
+
+A scikit-learn `MLPClassifier` is used to evaluate whether a neural-network-based approach is beneficial for this dataset.
+
+#### Random Forest
+
+Random Forest performs particularly strongly during model comparison and is subsequently optimized using a broader hyperparameter search.
+
+Bayesian hyperparameter optimization is implemented with **Optuna**.
+
+---
+
+### Hyperparameter Optimization
+
+Instead of optimizing every model for accuracy or generic ROC-AUC, optimization focuses directly on the domain-specific TPR-at-FPR objective.
+
+Separate optimization runs can therefore target different operating points:
 
 ```text
-1 → perfect alignment with the camera center
-0 → perpendicular orientation
+TPR @ FPR <= 0.01
+TPR @ FPR <= 0.02
+TPR @ FPR <= 0.05
+TPR @ FPR <= 0.10
+TPR @ FPR <= 0.20
 ```
 
-No further transformation of the target variable is required after converting the original `g/h` labels into `1/0`.
+This is important because the best model configuration can depend on how strongly background contamination must be suppressed.
 
 ---
 
-## Baseline Model
+### Model Selection and Independent Test Evaluation
 
-A simple **Logistic Regression** model is used as the baseline.
+Model selection is performed exclusively on the training data using cross-validation.
 
-The baseline model uses:
-
-- all 10 original features
-- standard scaling
-- no PCA
-- no resampling
-
-This model provides a reference point for evaluating whether more complex methods improve classification performance.
-
----
-
-## Modeling Strategy
-
-Several model families are evaluated and compared using stratified cross-validation.
-
-### Logistic Regression
-
-Logistic Regression is evaluated first.
-
-The experiments include:
-
-1. Logistic Regression without PCA
-2. Logistic Regression with PCA
-3. Hyperparameter optimization using Bayesian optimization
-
-This provides a comparison between a simple linear model, dimensionality reduction, and optimized model parameters.
-
----
-
-### Support Vector Machine
-
-Several nonlinear relationships were identified during the exploratory data analysis.
-
-For this reason, a nonlinear **Support Vector Machine (SVM)** is particularly interesting for this dataset.
-
-The SVM is evaluated both with default parameters and after hyperparameter optimization.
-
-Important hyperparameters such as `C` and `gamma` are optimized using Bayesian optimization.
-
----
-
-### Neural Network
-
-Because the dataset is relatively small, a simple neural network based on scikit-learn's `MLPClassifier` is evaluated first.
-
-The purpose is to investigate whether a neural-network-based approach appears promising before considering more complex deep-learning implementations.
-
-Different network architectures and training hyperparameters are subsequently optimized.
-
----
-
-### Random Forest
-
-Random Forest showed the strongest performance during the initial model comparison.
-
-The model was therefore optimized again using a broader hyperparameter search space.
-
-The optimized parameters include, among others:
-
-```text
-max_depth
-min_samples_split
-min_samples_leaf
-max_features
-class_weight
-criterion
-```
-
-Bayesian optimization with **Optuna** is used for hyperparameter tuning.
-
-The optimized Random Forest was ultimately found to be the best-performing model across all investigated FPR operating points.
-
----
-
-## Hyperparameter Optimization
-
-Bayesian optimization is used to search for suitable model hyperparameters efficiently.
-
-The optimization is implemented with **Optuna**.
-
-Instead of optimizing a generic metric such as accuracy, the models are optimized directly for the custom TPR-at-FPR scorer.
-
-This allows the optimization process to focus on the region of the ROC curve that is most relevant to the scientific classification problem.
-
-Separate optimization runs can be performed for the different FPR operating points:
-
-```text
-FPR ≤ 0.01
-FPR ≤ 0.02
-FPR ≤ 0.05
-FPR ≤ 0.10
-FPR ≤ 0.20
-```
-
----
-
-## Model Selection and Test Evaluation
-
-Model selection is performed exclusively using cross-validation on the training dataset.
-
-The test dataset is kept separate during:
+The test data are **not used** for:
 
 - feature engineering decisions
-- model comparison
 - hyperparameter optimization
+- model comparison
 - model selection
 
-Only after the best-performing model for each operating point has been selected based on the cross-validation results is it evaluated on the test dataset.
-
-The final test score is calculated using the same custom scorer that was used for the respective FPR operating point.
-
-This ensures that the test set remains an independent estimate of model generalization performance.
-
-The test data are **not used to fit or optimize the models**.
-
-The following heatmap summarizes the cross-validation performance of the evaluated
-model variants across the investigated FPR operating points.
-
-Higher values indicate a higher True Positive Rate while respecting the corresponding
-maximum False Positive Rate.
+Only after selecting the best-performing model for an operating point is the independent test set evaluated.
 
 <p align="center">
-  <img src="results/figures/model_performance_heat_map.png"
-       alt="Cross-validation model comparison heatmap"
+  <img src="results/ml/figures/model_performance_heat_map.png"
+       alt="Cross-validation model comparison across FPR operating points"
        width="900">
 </p>
 
-The comparison shows that the nonlinear models outperform the linear baseline,
-with the optimized Random Forest achieving the strongest overall performance
-across the relevant operating points.
+The comparison shows that nonlinear models outperform the linear baseline, with the optimized Random Forest providing the strongest overall performance across the investigated operating points.
 
 ---
 
+### Model Interpretation
 
-## Model Interpretation
+#### Learning Curves
 
-### Learning Curves
+The learning curves demonstrate that the difficulty of the classification problem depends strongly on the FPR constraint.
 
-The learning curves show that model generalization strongly depends on the selected
-FPR operating point.
+At strict operating points, training performance can remain substantially above validation performance, indicating a higher-variance regime. At more permissive operating points, training and validation performance converge more closely.
 
-At the stricter operating point of **FPR ≤ 0.05**, the Random Forest achieves nearly
-perfect training performance while validation performance remains considerably lower.
-This indicates a high-variance regime and shows how difficult it is to maintain high
-gamma efficiency while strongly suppressing hadronic background.
-
-At **FPR ≤ 0.20**, the validation score approaches the training score much more closely,
-indicating substantially better generalization.
-
-The validation curves continue to improve with increasing training-set size, suggesting
-that additional training data could still improve performance, particularly at stricter
-operating points.
+The validation curves also suggest that additional training data could still improve performance, particularly in the strict low-FPR regime.
 
 <p align="center">
-  <img src="results/figures/learning_curve_tpr_fpr_005.png"
+  <img src="results/ml/figures/learning_curve_tpr_fpr_005.png"
        alt="Learning curve for FPR 0.05"
        width="48%">
-  <img src="results/figures/learning_curve_tpr_fpr_020.png"
+  <img src="results/ml/figures/learning_curve_tpr_fpr_020.png"
        alt="Learning curve for FPR 0.20"
        width="48%">
 </p>
 
-### Feature Importance
+#### Feature Importance
 
-Permutation feature importance was used to investigate which information contributes
-most strongly to the domain-specific TPR@FPR metric.
+Permutation feature importance is used to investigate which information contributes most strongly to the domain-specific TPR-at-FPR metric.
 
-The results show that **image orientation**, represented mainly by `fAlpha` and
-`alpha_alignment`, is one of the strongest sources of information for distinguishing
-gamma from hadron events.
+The analysis indicates that important information comes from:
 
-Additional predictive information comes from image morphology, light concentration,
-and event size. The relative importance of these feature groups changes with the
-selected FPR operating point, indicating that increasingly strict background rejection
-requires a different combination of information.
+- shower-image orientation
+- image morphology
+- light concentration
+- event size
 
-Because several original and engineered features are correlated, individual importance
-values should not be interpreted independently. The results are therefore best
-interpreted at the level of feature groups.
+Because several original and engineered features are correlated, individual feature-importance values should be interpreted with care. Feature groups are more informative than isolated rankings.
 
 <p align="center">
-  <img src="results/figures/permutation_feature_importance.png"
+  <img src="results/ml/figures/permutation_feature_importance.png"
        alt="Permutation feature importance across FPR operating points"
        width="850">
 </p>
+
 ---
 
-## Main Findings
+### Main Findings from the Simulation Study
 
-The analysis shows that nonlinear models are considerably better suited to the gamma/hadron classification problem than the simple linear baseline.
+The main conclusions from the supervised machine-learning part are:
 
-The **optimized Random Forest** achieved the strongest overall performance across the investigated FPR operating points.
+- nonlinear models substantially outperform the simple linear baseline
+- the optimized Random Forest provides the strongest overall performance across the investigated operating points
+- classification becomes much more difficult as the allowed false-positive rate decreases
+- model quality therefore depends strongly on the selected operating point
+- orientation, morphology, light concentration, and event size all contribute useful discriminatory information
+- domain-specific evaluation reveals behavior that would be hidden by a single generic metric such as accuracy
 
-The results demonstrate that model performance strongly depends on the maximum allowed False Positive Rate.
+The low-FPR regime is especially important because it provides the conceptual bridge to real telescope observations, where background events dominate and individual event labels are unavailable.
 
-Very restrictive operating points such as:
+---
+
+## Part II — Real MAGIC DL3 Data
+
+### Why the Real-Data Problem Is Different
+
+The UCI data provide event-level ground truth:
 
 ```text
-FPR ≤ 0.01
+event -> gamma or hadron
 ```
 
-are considerably more challenging than less restrictive operating points such as:
+Real MAGIC DL3 data do not.
+
+At DL3 level, the telescope data have already passed through earlier reconstruction and event-selection stages. The files contain reconstructed quantities such as:
+
+- event time
+- reconstructed sky position
+- reconstructed energy
+- effective area
+- energy dispersion
+- energy-dependent event-selection information
+
+Therefore, the UCI classifier cannot simply be applied to the DL3 events: the original image parameters used by the classifier are not available at this stage, and there is no event-by-event gamma/hadron truth label.
+
+The real-data task is consequently one of **statistical signal extraction**, not supervised classification.
+
+---
+
+### ON/OFF Analysis
+
+The real-data workflow is implemented with **Astropy** and **Gammapy**.
+
+The Crab Nebula position defines the signal region (**ON region**). Background is estimated from reflected **OFF regions** with comparable observational acceptance.
+
+The analysis uses:
+
+- an energy-dependent `RAD_MAX` selection
+- reflected background regions
+- effective-area information
+- energy dispersion
+- safe-energy masking
+- WStat-based ON/OFF statistics
+
+For an observation with ON counts \(N_\mathrm{on}\), OFF counts \(N_\mathrm{off}\), and exposure ratio \(\alpha\):
 
 ```text
-FPR ≤ 0.20
+estimated background = alpha * N_off
+excess               = N_on - alpha * N_off
 ```
 
-The feature-importance analyses indicate that the most relevant information for distinguishing gamma events from hadronic background is related to:
+The excess is a statistical estimate of the gamma-ray signal. It does **not** mean that individual events can be tagged as confirmed gamma rays.
 
-- orientation of the shower image
-- light concentration
-- image size
-- image morphology
+---
 
-The project therefore demonstrates why evaluation metrics should reflect the requirements of the underlying scientific problem instead of relying only on generic classification metrics such as accuracy.
+### Pilot Analysis of a Real MAGIC Observation
+
+The real-data workflow was first validated on a single Crab Nebula observation from the MAGIC DL3 public data release.
+
+The observation has a livetime of approximately 19.6 minutes and was analysed using an energy-dependent signal region together with reflected OFF regions for background estimation.
+
+| Quantity | Result |
+|---|---:|
+| Observation ID | `5030908` |
+| Livetime | 19.59 min |
+| ON counts | 426 |
+| OFF counts | 446 |
+| Alpha | 0.333 |
+| Estimated background | 148.67 |
+| Excess | 277.33 |
+| Significance | 15.14 sigma |
+| Energy bins | 17 |
+| Fit bins | 16 |
+
+The estimated background is obtained from the OFF regions according to
+
+```text
+background = alpha * N_off
+```
+
+and the corresponding excess is
+
+```text
+excess = N_on - alpha * N_off
+```
+
+For this observation:
+
+```text
+background = 0.333 * 446 ≈ 148.67
+excess     = 426 - 148.67 ≈ 277.33
+```
+
+The resulting excess corresponds to a detection significance of approximately **15.1 sigma**, demonstrating a strong Crab Nebula signal within a single observation run of roughly 20 minutes.
+
+#### Energy-Dependent Signal and Background
+
+The following figure shows the number of events in the ON region together with the background estimate derived from the OFF regions and the resulting excess as a function of reconstructed energy.
+
+<p align="center">
+  <img src="results/dl3/figures/dl3_on_background_excess.png"
+       alt="Energy-binned ON counts, estimated background, and excess for one Crab Nebula observation"
+       width="850">
+</p>
+
+<p align="center">
+  <em>
+    Energy-binned ON counts, estimated background, and excess for one Crab Nebula observation.
+  </em>
+</p>
+
+The low-energy bins contain most of the recorded events and also the largest background contribution. At higher reconstructed energies, substantially fewer events are observed because of the limited exposure of this individual observation run.
+
+The excess represents a **statistical estimate of the gamma-ray signal**. It does not imply that individual events can be identified as confirmed gamma rays.
+
+#### Reflected-Region Background Estimation
+
+The background is estimated using regions at comparable offsets from the telescope pointing direction. In the reflected-regions method, the source region and the background regions are positioned at the same radial distance from the pointing position.
+
+<p align="center">
+  <img src="results/dl3/figures/dl3_on_off_geometry_schematic.png"
+       alt="Schematic ON/OFF geometry for reflected background estimation"
+       width="550">
+</p>
+
+<p align="center">
+  <em>
+    Schematic illustration of the ON region and reflected OFF regions used for background estimation in wobble observations.
+  </em>
+</p>
+
+The OFF regions provide an estimate of the background under observational conditions that are similar to those of the ON region.
+
+For this analysis, the normalization factor is
+
+```text
+alpha = 1 / 3
+```
+
+which reflects the relative acceptance of the ON and OFF regions.
+
+The schematic is intended to illustrate the background-estimation concept. The actual analysis uses the observation geometry and energy-dependent selection information provided by the MAGIC DL3 data.
+
+#### Interpretation
+
+This pilot analysis serves two purposes:
+
+1. It validates the technical DL3 processing chain using real MAGIC data.
+2. It illustrates the conceptual difference between simulated classification and real observational inference.
+
+In the simulated UCI dataset, every event has a known gamma/hadron label. In the real DL3 observation, no such event-level truth is available. Instead, evidence for gamma-ray emission is obtained statistically by comparing the ON region with an independently estimated background.
+
+This distinction provides the central connection between the two parts of the project: the low-FPR classification problem in simulation and the background-suppression problem in real observations address different stages of the same underlying scientific challenge.
+
+---
+
+## From Simulation to Reality
+
+The two parts of the project address different stages of the same scientific problem.
+
+| Simulation / UCI | Real MAGIC DL3 |
+|---|---|
+| Monte-Carlo events | Telescope observations |
+| event-level ground truth | no event-level truth labels |
+| gamma vs. hadron classification | statistical signal extraction |
+| image parameters available | reconstructed DL3 quantities available |
+| supervised ML | ON/OFF inference |
+| TPR/FPR directly measurable | signal/background estimated statistically |
+
+This difference highlights a central challenge of scientific machine learning: **excellent performance on simulated data does not automatically imply equivalent performance on real observations**.
+
+Potential differences between simulation and reality include:
+
+- imperfect detector simulation
+- changing observation conditions
+- background composition
+- calibration effects
+- preprocessing and selection effects
+- differences between training and deployment distributions
+
+This is a form of **domain shift**.
+
+The low-FPR analysis in Part I is therefore not only a modeling choice. It reflects the same underlying problem that appears in Part II: reliable gamma-ray analysis depends critically on suppressing a much larger background population.
 
 ---
 
@@ -401,177 +474,187 @@ The project therefore demonstrates why evaluation metrics should reflect the req
 
 ```text
 project/
-│
+|
 ├── data/
-│   ├── raw/
-│   │   ├── magic04.data
-|   |   |   └── raw data
-|   |   └── magic04.names
-|   |       └── additional information about dataset
+│   ├── uci/
+│   │   ├── raw/
+│   │   │   ├── magic04.data
+│   │   │   └── magic04.names
+│   │   ├── interim/
+│   │   └── processed/
 │   │
-│   └── processed/
-│       └── prepared datasets
-│
+│   └── dl3/
+│       └── raw/
+│           └── MAGIC DL3 FITS data
+|
 ├── notebooks/
-│   ├── Gamma_EDA.ipynb
-│   │   └── Exploratory data analysis and feature investigation
+│   ├── uci_ml/
+│   │   ├── Gamma_EDA.ipynb
+│   │   └── Gamma_models_thresholds.ipynb
 │   │
-│   └── Gamma_models_thresholds.ipynb
-│       └── Training, comparison, validation and interpretation of models for different threshold values for fpr
+│   └── dl3_real_data/
+│       └── MAGIC_DL3.ipynb
 |
 ├── results/
-|   ├── figures/
-|   |   ├── eda_feature_distributions.png
-|   |   |   └── distribution of selected features by class
-|   |   |
-|   |   ├── learning_curve_for_tpr_fpr_001.png
-|   |   |   └── Learning curve for final model with FPR operating point 0.01
-|   |   |
-|   |   ├── learning_curve_for_tpr_fpr_002.png
-|   |   |
-|   |   ├── learning_curve_for_tpr_fpr_005.png
-|   |   |
-|   |   ├── learning_curve_for_tpr_fpr_010.png
-|   |   |
-|   |   ├── learning_curve_for_tpr_fpr_020.png
-|   |   |
-|   |   ├── model_performance_heat_map.png
-|   |   |   └── shows comparison of results of different models at different operating points
-|   |   |
-|   |   ├── permutation_feature_importance.png
-|   |   |   └── shows which information contributes most strongly to the domain-specific TPR@FPR metric
-|   |   |
-|   |   └── random_forest_feature_importance.png
-|   |       └── shows for contribution to the domain-specific TPR@FPR metric for random forests
-|   |  
-|   └── tables/
-|       ├── score_overview.csv
-|       |   └── CV scores for different fpr thresholds and models
-|       |
-|       └── score_table.csv
-|           └── Data used for heatmap representation of fpr threshold and models
+│   ├── ml/
+│   │   ├── figures/
+│   │   └── tables/
+│   │
+│   └── dl3/
+│       ├── figures/
+│       └── tables/
 |
 ├── src/
-|   |
-|   ├── baseline_model.py
-|   |   └── Baseline-model implementation
-|   |
-│   ├── features.py
-│   │   └── Reusable feature-engineering functions
-|   |
-|   ├── log_reg.py
-|   |   └── implementation of different logistic regression models with and without optimization
-│   │
-|   ├── neural_network.py
-|   |   └── implementation of different neural network models with and without optimization
-|   |
-|   ├── random_forest.py
-|   |   └── implementation of different random forest models with and without optimization
-
-│   ├── resample.py
-│   │   └── test of different resample strategies
-│   │
-│   └── support_vector_machine.py
-│       └── implementation of different SVM models with and without optimization
-│
+│   └── portfolio_projekt/
+│       ├── paths.py
+│       └── ml/
+│           ├── __init__.py
+│           ├── baseline_model.py
+│           ├── features.py
+│           ├── log_reg.py
+│           ├── neural_network.py
+│           ├── random_forest.py
+│           ├── resample.py
+│           └── support_vector_machine.py
+|
 ├── pyproject.toml
 ├── .gitignore
 └── README.md
 ```
 
-The notebooks contain the analysis, experiments, visualizations, and interpretation.
+The notebooks contain the analytical workflow, visualizations, experiments, and interpretation.
 
-Reusable functionality is moved into the `src/` directory to separate implementation details from the analytical workflow and to avoid duplicated code.
-
+Reusable implementation code is located in the `portfolio_projekt` package under `src/`, while project paths are defined centrally in `paths.py`.
 
 ---
 
 ## Technologies
 
-The project is implemented in Python and primarily uses:
+### Machine Learning
+
+- Python
+- pandas
+- NumPy
+- Matplotlib
+- seaborn
+- scikit-learn
+- imbalanced-learn
+- Optuna
+- Jupyter
+
+### Scientific / Real-Data Analysis
+
+- Astropy
+- Gammapy
+- FITS / GADF data
+
+### Project Management
+
+- Git / GitHub
+- `uv`
+- VS Code
+
+---
+
+## Environment
+
+The project uses a `pyproject.toml` configuration and `uv` for dependency management.
+
+The machine-learning workflow and the real-data workflow are kept conceptually separate because scientific astronomy packages can impose additional dependency constraints.
+
+The DL3 analysis was validated with:
 
 ```text
-pandas
-NumPy
-Matplotlib
-scikit-learn
-imbalanced-learn
-Optuna
-Jupyter
+Gammapy 2.1
+regions 0.11
 ```
 
-The Python environment and project dependencies are managed using **uv**.
+A separate DL3 virtual environment can therefore be useful when reproducing the astronomy workflow.
 
 ---
 
 ## Workflow
 
-The overall project workflow can be summarized as:
-
 ```text
-Raw Data
-   │
-   ▼
-Exploratory Data Analysis
-   │
-   ▼
-Data Preparation
-   │
-   ▼
-Feature Engineering
-   │
-   ▼
-Baseline Model
-   │
-   ▼
-Initial Model Training
-   │
-   ├── Logistic Regression
-   ├── Support Vector Machine
-   ├── Neural Network
-   └── Random Forest
-   │
-   ▼
-Bayesian Hyperparameter Optimization
-   │
-   ├── Optimized Logistic Regression
-   ├── Optimized Support Vector Machine
-   ├── Optimized Neural Network
-   └── Optimized Random Forest
-   │
-   ▼
-Model Comparison
-   │
-   ├── Baseline model
-   ├── Simple models
-   └── Optimized models
-   │
-   ▼
-Cross-Validation Model Selection
-   │
-   ▼
-Best Model for Each FPR Operating Point
-   │
-   ▼
-Independent Test Evaluation
-   │
-   ▼
-Learning Curves
-   │
-   ▼
-Feature Importance Analysis
+                         MAGIC Gamma-Ray Analysis
+                                   |
+                  +----------------+----------------+
+                  |                                 |
+                  v                                 v
+          Monte-Carlo Simulation             Real MAGIC DL3
+                (UCI)                          Observations
+                  |                                 |
+                  v                                 v
+        Exploratory Data Analysis             Event Selection
+                  |                                 |
+                  v                                 v
+          Feature Engineering                   ON Region
+                  |                                 |
+                  v                                 v
+           Baseline Model                    Reflected OFF Regions
+                  |                                 |
+                  v                                 v
+       LR / SVM / RF / MLP Models            Background Estimate
+                  |                                 |
+                  v                                 v
+        Optuna Optimization                     Excess
+                  |                                 |
+                  v                                 v
+       TPR @ constrained FPR                  Significance
+                  |                                 |
+                  +---------------+-----------------+
+                                  |
+                                  v
+                       Simulation-to-Reality
+                           Interpretation
 ```
+
+---
+
+## Current Status and Next Steps
+
+### Completed
+
+- end-to-end ML workflow on the UCI MAGIC dataset
+- domain-specific TPR-at-FPR scoring
+- comparison of multiple model families
+- Bayesian hyperparameter optimization
+- independent test evaluation
+- learning-curve analysis
+- feature-importance analysis
+- parsing and inspection of real MAGIC DL3 FITS files
+- implementation of a Gammapy ON/OFF analysis
+- successful validation on a real Crab Nebula observation
+
+### Planned Extension
+
+The next step is to apply the validated DL3 workflow to the full public observation sample and aggregate the results across multiple runs.
+
+Possible later extensions include:
+
+- stacked analysis of all Crab observations
+- energy-dependent excess and significance
+- spectral analysis
+- comparison between observation conditions
+- deeper investigation of simulation-to-reality domain shift
 
 ---
 
 ## Conclusion
 
-This project demonstrates an end-to-end machine-learning workflow for a scientific binary-classification problem.
+This project combines supervised machine learning on simulated events with statistical analysis of real telescope observations.
 
-A key aspect of the project is the use of a domain-specific evaluation strategy. Instead of optimizing generic classification accuracy, model performance is evaluated by maximizing gamma efficiency while explicitly limiting the fraction of hadronic background events incorrectly classified as signal.
+The simulation study shows that nonlinear models are well suited to gamma/hadron separation and that performance strongly depends on the allowed false-positive rate. The optimized Random Forest provides the strongest overall performance among the investigated approaches.
 
-The comparison of several model families shows that nonlinear methods substantially outperform the linear baseline.
+The real-data analysis demonstrates why the problem changes fundamentally outside simulation: event-level truth labels disappear, background must be estimated statistically, and conclusions are drawn from populations of events rather than individual classifications.
 
-Among the evaluated approaches, the optimized Random Forest provides the strongest overall performance across the investigated operating points.
+The central lesson of the project is therefore broader than the choice of classifier:
 
-The combination of domain-specific scoring, cross-validation, Bayesian hyperparameter optimization, learning-curve analysis, and feature-importance methods provides both strong predictive performance and insight into the underlying classification problem.
+> Scientific machine learning requires not only predictive performance, but also evaluation metrics, validation strategies, and inference methods that reflect the structure of the real measurement problem.
+
+---
+
+## Data Credits
+
+- R. Bock, **MAGIC Gamma Telescope**, UCI Machine Learning Repository. DOI: [10.24432/C52C8B](https://doi.org/10.24432/C52C8B)
+- MAGIC Collaboration, **MAGIC Data Level 3 (DL3) Public Data Release 1 (PDR1)**, Zenodo. DOI: [10.5281/zenodo.11108474](https://doi.org/10.5281/zenodo.11108474)

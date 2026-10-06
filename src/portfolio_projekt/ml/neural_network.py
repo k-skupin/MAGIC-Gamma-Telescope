@@ -75,7 +75,7 @@ def neural_network(features, target, threshold, cv, scoring, thresholds, model_n
     nn_pipe.fit(features, target)
         
     #save fitted pipeline
-    from portfolio_projekt.paths import MODELS_DIR
+    model_dir = MODELS_DIR
     model_dir.mkdir(parents=True, exist_ok=True)
     
     model_path = model_dir / f"nn_{threshold}.p"
@@ -226,9 +226,8 @@ def neural_network_opt(features, target, threshold, cv, scoring, thresholds, mod
     nn_pipe_bo.fit(features, target)
     
      #save fitted pipeline
-    from portfolio_projekt.paths import MODELS_DIR
-    model_dir.mkdir(parents=True, exist_ok=True)        
-    model_path = model_dir / f"nn__opt_{threshold}.p"
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)       
+    model_path = MODELS_DIR / f"nn__opt_{threshold}.p"
     pickle.dump(nn_pipe_bo, open(model_path, 'wb'))
     files.append(model_path)
     
