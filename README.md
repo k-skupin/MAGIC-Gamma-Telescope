@@ -286,189 +286,290 @@ The low-FPR regime is especially important because it provides the conceptual br
 
 ---
 
-## Part II — Real MAGIC DL3 Data
+## Part II — From Machine Learning to Real Telescope Data
 
-### Why the Real-Data Problem Is Different
+### Why Add Real MAGIC Data?
 
-The UCI data provide event-level ground truth:
+The machine-learning part of this project uses simulated telescope events for which the true class is known:
 
 ```text
-event -> gamma or hadron
+Gamma event  -> signal
+Hadron event -> background
 ```
 
-Real MAGIC DL3 data do not.
+This makes supervised learning possible. A model can learn which event characteristics are typical for gamma rays and which are more typical for background events.
 
-At DL3 level, the telescope data have already passed through earlier reconstruction and event-selection stages. The files contain reconstructed quantities such as:
+Real telescope observations are different.
 
-- event time
-- reconstructed sky position
-- reconstructed energy
-- effective area
-- energy dispersion
-- energy-dependent event-selection information
+In real MAGIC DL3 data, there is no label telling us whether an individual event is truly a gamma ray or background. Instead, the telescope records reconstructed events from different directions in the sky.
 
-Therefore, the UCI classifier cannot simply be applied to the DL3 events: the original image parameters used by the classifier are not available at this stage, and there is no event-by-event gamma/hadron truth label.
+The real-data question therefore changes from
 
-The real-data task is consequently one of **statistical signal extraction**, not supervised classification.
+> **"Can a machine-learning model classify this individual event correctly?"**
+
+to
+
+> **"Do we observe more events from the direction of a known gamma-ray source than we would expect from background alone?"**
+
+This is the main connection between the two parts of the project.
 
 ---
 
-### ON/OFF Analysis
+### How Is a Gamma-Ray Signal Found in Real Data?
 
-The real-data workflow is implemented with **Astropy** and **Gammapy**.
+The Crab Nebula is a well-known gamma-ray source and is used here as a real-world test case.
 
-The Crab Nebula position defines the signal region (**ON region**). Background is estimated from reflected **OFF regions** with comparable observational acceptance.
+The analysis compares two types of sky regions:
 
-The analysis uses:
+- **ON region:** the region where the Crab Nebula is located
+- **OFF regions:** nearby control regions used to estimate the background
 
-- an energy-dependent `RAD_MAX` selection
-- reflected background regions
-- effective-area information
-- energy dispersion
-- safe-energy masking
-- WStat-based ON/OFF statistics
-
-For an observation with ON counts \(N_\mathrm{on}\), OFF counts \(N_\mathrm{off}\), and exposure ratio \(\alpha\):
+The basic idea is simple:
 
 ```text
-estimated background = alpha * N_off
-excess               = N_on - alpha * N_off
+events in ON region
+- expected background
+= gamma-ray excess
 ```
 
-The excess is a statistical estimate of the gamma-ray signal. It does **not** mean that individual events can be tagged as confirmed gamma rays.
+Because several OFF regions can be used, their event count is scaled by a factor called `alpha`.
 
----
-
-### Pilot Analysis of a Real MAGIC Observation
-
-The real-data workflow was first validated on a single Crab Nebula observation from the MAGIC DL3 public data release.
-
-The observation has a livetime of approximately 19.6 minutes and was analysed using an energy-dependent signal region together with reflected OFF regions for background estimation.
-
-| Quantity | Result |
-|---|---:|
-| Observation ID | `5030908` |
-| Livetime | 19.59 min |
-| ON counts | 426 |
-| OFF counts | 446 |
-| Alpha | 0.333 |
-| Estimated background | 148.67 |
-| Excess | 277.33 |
-| Significance | 15.14 sigma |
-| Energy bins | 17 |
-| Fit bins | 16 |
-
-The estimated background is obtained from the OFF regions according to
+Mathematically:
 
 ```text
-background = alpha * N_off
+background = alpha × N_OFF
+
+excess = N_ON - background
 ```
 
-and the corresponding excess is
+The **excess** is not a list of individually confirmed gamma rays. It is a statistical estimate of how many more events were observed from the source direction than expected from background.
 
-```text
-excess = N_on - alpha * N_off
-```
-
-For this observation:
-
-```text
-background = 0.333 * 446 ≈ 148.67
-excess     = 426 - 148.67 ≈ 277.33
-```
-
-The resulting excess corresponds to a detection significance of approximately **15.1 sigma**, demonstrating a strong Crab Nebula signal within a single observation run of roughly 20 minutes.
-
-#### Energy-Dependent Signal and Background
-
-The following figure shows the number of events in the ON region together with the background estimate derived from the OFF regions and the resulting excess as a function of reconstructed energy.
-
-<p align="center">
-  <img src="results/dl3/figures/dl3_on_background_excess.png"
-       alt="Energy-binned ON counts, estimated background, and excess for one Crab Nebula observation"
-       width="850">
-</p>
-
-<p align="center">
-  <em>
-    Energy-binned ON counts, estimated background, and excess for one Crab Nebula observation.
-  </em>
-</p>
-
-The low-energy bins contain most of the recorded events and also the largest background contribution. At higher reconstructed energies, substantially fewer events are observed because of the limited exposure of this individual observation run.
-
-The excess represents a **statistical estimate of the gamma-ray signal**. It does not imply that individual events can be identified as confirmed gamma rays.
-
-#### Reflected-Region Background Estimation
-
-The background is estimated using regions at comparable offsets from the telescope pointing direction. In the reflected-regions method, the source region and the background regions are positioned at the same radial distance from the pointing position.
+A second quantity, the **significance**, describes how convincing this excess is. A large significance means that the observed excess is very unlikely to be caused by random background fluctuations alone.
 
 <p align="center">
   <img src="results/dl3/figures/dl3_on_off_geometry_schematic.png"
-       alt="Schematic ON/OFF geometry for reflected background estimation"
+       alt="Schematic ON/OFF background estimation"
        width="550">
 </p>
 
+---
+
+### First Real Observation
+
+The workflow was first tested on one approximately 20-minute Crab Nebula observation.
+
+| Quantity | Result |
+|---|---:|
+| Livetime | 19.6 min |
+| Events in ON region | 426 |
+| Estimated background | 148.7 |
+| Gamma-ray excess | 277.3 |
+| Detection significance | 15.1 sigma |
+
+In simple terms:
+
+> The telescope recorded far more events from the Crab Nebula direction than would be expected from background alone.
+
+This validates that the real-data analysis pipeline is able to detect a known gamma-ray source.
+
 <p align="center">
-  <em>
-    Schematic illustration of the ON region and reflected OFF regions used for background estimation in wobble observations.
-  </em>
+  <img src="results/dl3/figures/dl3_on_background_excess.png"
+       alt="Energy-binned ON counts, estimated background and excess"
+       width="800">
 </p>
 
-The OFF regions provide an estimate of the background under observational conditions that are similar to those of the ON region.
+---
 
-For this analysis, the normalization factor is
+### What Happens Under Different Observing Conditions?
+
+After validating the workflow on one observation, the analysis was extended to the complete set of available Crab Nebula observations.
+
+Two practical questions were investigated:
+
+1. Does a brighter night sky make gamma-ray detection more difficult?
+2. Does the position of the source inside the telescope camera influence the result?
+
+These effects are especially relevant when moving from simulated machine-learning data to real measurements because real observing conditions are not constant.
+
+---
+
+### 1. Influence of Moonlight and Night-Sky Background
+
+The MAGIC telescope detects extremely short and faint flashes of Cherenkov light produced by particle showers in the atmosphere.
+
+Moonlight and other sources of night-sky illumination increase the optical background seen by the camera. Weak Cherenkov signals can therefore become more difficult to distinguish reliably from background light.
+
+The real observations were grouped according to their **Night-Sky Background (NSB)** level.
+
+The analysis shows that under the brightest conditions:
+
+- the minimum reliably usable energy increases from about **0.12 TeV to 0.19 TeV**
+- the measured gamma-ray excess rate decreases from roughly **850–880 events per hour** under dark or low-background conditions to about **450 events per hour**
+
+<p align="center">
+  <img src="results/dl3/figures/safe_energy_threshold_vs_nsb.png"
+       alt="Safe energy threshold under different night-sky background conditions"
+       width="750">
+</p>
+
+<p align="center">
+  <img src="results/dl3/figures/excess_rate_vs_nsb.png"
+       alt="Gamma-ray excess rate under different night-sky background conditions"
+       width="750">
+</p>
+
+A simple interpretation is:
+
+> Bright sky conditions make weak gamma-ray events more difficult to detect reliably.
+
+The result should not be interpreted as a perfectly controlled sensitivity measurement, because the observation groups also differ in other conditions and some groups contain only a few runs.
+
+Nevertheless, the real data clearly illustrate that observing conditions can influence the usable energy range and the measured source signal.
+
+---
+
+### 2. Influence of the Source Position in the Camera
+
+MAGIC observations are often performed with the source slightly away from the exact center of the camera.
+
+The **camera offset** describes the angular distance between the source position and the telescope pointing direction.
+
+A small offset means that the source is located relatively close to the center of the camera field of view. A large offset places it farther towards the edge.
+
+The multi-offset observations show a clear decrease in the measured excess rate at large offsets:
 
 ```text
-alpha = 1 / 3
+0.40° offset -> about 904 excess events/hour
+1.00° offset -> about 462 excess events/hour
+1.40° offset -> about 251 excess events/hour
 ```
 
-which reflects the relative acceptance of the ON and OFF regions.
+<p align="center">
+  <img src="results/dl3/figures/excess_rate_vs_camera_offset.png"
+       alt="Gamma-ray excess rate versus camera offset"
+       width="750">
+</p>
 
-The schematic is intended to illustrate the background-estimation concept. The actual analysis uses the observation geometry and energy-dependent selection information provided by the MAGIC DL3 data.
+This behavior is consistent with the telescope becoming less efficient when the source is observed farther away from the camera center.
 
-#### Interpretation
-
-This pilot analysis serves two purposes:
-
-1. It validates the technical DL3 processing chain using real MAGIC data.
-2. It illustrates the conceptual difference between simulated classification and real observational inference.
-
-In the simulated UCI dataset, every event has a known gamma/hadron label. In the real DL3 observation, no such event-level truth is available. Instead, evidence for gamma-ray emission is obtained statistically by comparing the ON region with an independently estimated background.
-
-This distinction provides the central connection between the two parts of the project: the low-FPR classification problem in simulation and the background-suppression problem in real observations address different stages of the same underlying scientific challenge.
+The groups at 0.35° and 0.70° contain only a small number of observations and should therefore be interpreted cautiously.
 
 ---
 
-## From Simulation to Reality
+### Combined Multi-Offset Detection
 
-The two parts of the project address different stages of the same scientific problem.
+All 71 multi-offset observations were also combined into one stacked analysis.
 
-| Simulation / UCI | Real MAGIC DL3 |
+| Quantity | Result |
+|---|---:|
+| Number of observations | 71 |
+| Total livetime | 21.16 h |
+| Events in ON region | 17,826 |
+| Estimated background | 3,985 |
+| Gamma-ray excess | 13,841 |
+| Detection significance | 124.9 sigma |
+
+The Crab Nebula is therefore detected very clearly across the complete multi-offset dataset.
+
+Again, the excess represents a **statistical source signal**, not 13,841 individually identified gamma rays.
+
+---
+
+## Connection to the Machine-Learning Part
+
+The machine-learning analysis and the DL3 analysis use different methods, but they address the same underlying scientific problem:
+
+> **How can a relatively small gamma-ray signal be separated from a much larger background?**
+
+The difference lies mainly in the information that is available.
+
+| Machine Learning on Simulation | Real MAGIC Observations |
 |---|---|
-| Monte-Carlo events | Telescope observations |
-| event-level ground truth | no event-level truth labels |
-| gamma vs. hadron classification | statistical signal extraction |
-| image parameters available | reconstructed DL3 quantities available |
-| supervised ML | ON/OFF inference |
-| TPR/FPR directly measurable | signal/background estimated statistically |
+| Events have known gamma/hadron labels | Individual events have no true labels |
+| Model learns signal vs. background | Signal is estimated statistically |
+| False-positive rate measures accepted background | OFF regions estimate the real background |
+| True-positive rate measures retained gamma events | Excess estimates the source-associated signal |
+| Performance can be evaluated directly | Detection is evaluated statistically |
 
-This difference highlights a central challenge of scientific machine learning: **excellent performance on simulated data does not automatically imply equivalent performance on real observations**.
+The relationship can be summarized as:
 
-Potential differences between simulation and reality include:
+```text
+SIMULATION / MACHINE LEARNING
 
-- imperfect detector simulation
-- changing observation conditions
-- background composition
-- calibration effects
-- preprocessing and selection effects
-- differences between training and deployment distributions
+Known labels:
+gamma vs. hadron
 
-This is a form of **domain shift**.
+        ↓
 
-The low-FPR analysis in Part I is therefore not only a modeling choice. It reflects the same underlying problem that appears in Part II: reliable gamma-ray analysis depends critically on suppressing a much larger background population.
+Learn which event properties
+separate signal from background
+
+        ↓
+
+Evaluate:
+How many gamma events are retained?
+How much background is falsely accepted?
+
+
+REAL TELESCOPE DATA
+
+No event-level labels
+
+        ↓
+
+Estimate the background
+from control regions
+
+        ↓
+
+Measure:
+Is there a statistically significant
+excess from the source direction?
+```
+
+This also explains why the machine-learning part focuses strongly on the **false-positive rate**.
+
+In gamma-ray astronomy, background events are much more common than true gamma-ray events. Even a classifier that accepts only a small fraction of the background can therefore produce many false gamma candidates.
+
+The same basic challenge reappears in the real-data analysis:
+
+- the machine-learning model tries to **suppress background events**
+- the ON/OFF method estimates **how much background remains in the real observation**
+
+Both parts therefore study the same signal-versus-background problem at different stages of the analysis chain.
 
 ---
+
+### Why the Real-Data Part Matters
+
+The DL3 analysis also demonstrates an important limitation of simulation-based machine learning:
+
+> Good performance on simulated data does not automatically guarantee identical performance under real observing conditions.
+
+Real observations are influenced by effects such as:
+
+- moonlight and night-sky background
+- source position inside the camera
+- detector response
+- calibration
+- changing atmospheric and observational conditions
+
+The DL3 analysis therefore serves as a **reality check** for the machine-learning study.
+
+The machine-learning part shows how gamma and hadron events can be separated when ground-truth labels are available.
+
+The real-data part shows how the same scientific objective — extracting a gamma-ray signal from background — must be approached when those labels no longer exist.
+
+---
+
+### Main Takeaway
+
+The two parts of the project can be summarized in one sentence:
+
+> **Simulation allows us to learn and evaluate signal-background separation at the individual-event level, while real telescope observations require statistical evidence that a source signal remains above the background.**
+
+This transition from simulated classification to real observational inference is the central link between the machine-learning and DL3 parts of the project.
+
 
 ## Repository Structure
 
@@ -611,34 +712,6 @@ A separate DL3 virtual environment can therefore be useful when reproducing the 
 
 ---
 
-## Current Status and Next Steps
-
-### Completed
-
-- end-to-end ML workflow on the UCI MAGIC dataset
-- domain-specific TPR-at-FPR scoring
-- comparison of multiple model families
-- Bayesian hyperparameter optimization
-- independent test evaluation
-- learning-curve analysis
-- feature-importance analysis
-- parsing and inspection of real MAGIC DL3 FITS files
-- implementation of a Gammapy ON/OFF analysis
-- successful validation on a real Crab Nebula observation
-
-### Planned Extension
-
-The next step is to apply the validated DL3 workflow to the full public observation sample and aggregate the results across multiple runs.
-
-Possible later extensions include:
-
-- stacked analysis of all Crab observations
-- energy-dependent excess and significance
-- spectral analysis
-- comparison between observation conditions
-- deeper investigation of simulation-to-reality domain shift
-
----
 
 ## Conclusion
 
