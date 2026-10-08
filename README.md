@@ -725,6 +725,12 @@ The central lesson of the project is therefore broader than the choice of classi
 
 > Scientific machine learning requires not only predictive performance, but also evaluation metrics, validation strategies, and inference methods that reflect the structure of the real measurement problem.
 
+The project demonstrates that machine-learning-based gamma/hadron classification can serve as an effective event-level preselection step in a realistic Cherenkov-telescope analysis pipeline. A trained classifier can substantially reduce hadronic background before subsequent reconstruction and scientific analysis.
+
+However, the classifier does not replace the astronomical background estimation itself. Even highly gamma-like event selections still contain residual background, so methods such as ON/OFF analysis or likelihood-based background modeling remain necessary to derive robust source detections, spectra, and flux estimates.
+
+In this sense, the developed model represents a realistic intermediate processing step: it filters and ranks individual events, while the final astrophysical interpretation is performed statistically on the remaining event sample.
+
 ---
 
 ## Data Credits
